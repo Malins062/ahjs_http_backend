@@ -14,6 +14,8 @@
 
 ## HelpDesk
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ia3cvyrs16n0ua71/branch/main?svg=true)](https://ci.appveyor.com/project/Malins062/ahjs-http-backend/branch/main)
+
 ### Легенда
 
 Пока backend-разработчик находится в отпуске, вам поручили сделать прототип API для сервиса управления заявками на помощь (можете за себя порадоваться, так недалеко и до fullstack'а), к которому вам и нужно будет в дальнейшем прикруить frontend.
