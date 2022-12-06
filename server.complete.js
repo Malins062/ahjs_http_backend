@@ -5,6 +5,7 @@ const Koa = require('koa');
 const koaBody = require('koa-body');
 const koaStatic = require('koa-static');
 const uuid = require('uuid');
+
 const app = new Koa();
 
 // => Static file handling
@@ -37,7 +38,8 @@ const app = new Koa();
 //     });
 
 //     if (ctx.request.get('Access-Control-Request-Headers')) {
-//       ctx.response.set('Access-Control-Allow-Headers', ctx.request.get('Access-Control-Request-Headers'));
+//       ctx.response.set('Access-Control-Allow-Headers', 
+                            // ctx.request.get('Access-Control-Request-Headers'));
 //     }
 
 //     ctx.response.status = 204;
@@ -98,4 +100,4 @@ const app = new Koa();
 // });
 
 const port = process.env.PORT || 7070;
-http.createServer(app.callback()).listen(port)
+http.createServer(app.callback()).listen(port);
