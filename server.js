@@ -95,7 +95,7 @@ app.use(koaBody({
 // => GET/POST
 app.use(async ctx => {
     const { method } = ctx.request.querystring;
-    console.log(method, ctx.request.querystring, ctx.request.body,
+    console.log(method, ctx.request.method, ctx.request.querystring, ctx.request.body,
       ctx.request
       );
 
