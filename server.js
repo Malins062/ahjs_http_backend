@@ -53,12 +53,14 @@ app.use(koaStatic(public));
 // => CORS
 app.use(async (ctx, next) => {
   const origin = ctx.request.get('Origin');
+  console.log(origin);
   if (!origin) {
     return await next();
   }
 
   const headers = { 'Access-Control-Allow-Origin': '*', };
 
+  console.log(headers, ctx.request.method);
   if (ctx.request.method !== 'OPTIONS') {
     ctx.response.set({...headers});
     try {
@@ -123,7 +125,7 @@ app.use(async ctx => {
 
 
 const port = process.env.PORT || 7070;
-http.createServer(app.callback()).listen(port,port, (err) => {
+http.createServer(app.callback()).listen(port, (err) => {
   if (err) {
     return console.log('Error occured:', err);
   }
