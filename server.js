@@ -28,9 +28,34 @@ const tickets = [
   },
 ];
 
-// app.use(koaBody({
-//   urlencoded: true,
-// }));
+// => Static file handling
+const public = path.join(__dirname, '/public')
+app.use(koaStatic(public));
+
+app.use(koaBody({
+  urlencoded: true,
+  multipart: true,
+}));
+
+app.use((ctx, next) => {
+  console.log('STEP - 1');
+  console.log(`Request method: ${ctx.request.method}`);
+  console.log(`Headers: ${ctx.headers}`);
+  
+  if (ctx.request.method !== 'OPTIONS') {
+    next();
+
+    return;
+  }
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
+
+  ctx.response.status = 204;
+
+  console.log(`Response status code: ${ctx.response.status}`);
+});
 
 // app.use(async ctx => {
 //     const { method } = ctx.request.querystring;
@@ -46,70 +71,68 @@ const tickets = [
 //     }
 // });
 
-// => Static file handling
-const public = path.join(__dirname, '/public')
-app.use(koaStatic(public));
 
 // => CORS
-app.use(async (ctx, next) => {
-  const origin = ctx.request.get('Origin');
-  console.log(origin);
-  if (!origin) {
-    return await next();
-  }
+// app.use(async (ctx, next) => {
+//   const origin = ctx.request.get('Origin');
+//   console.log(origin);
+//   if (!origin) {
+//     return await next();
+//   }
 
-  const headers = { 'Access-Control-Allow-Origin': '*', };
+//   const headers = { 'Access-Control-Allow-Origin': '*', };
 
-  console.log(headers, ctx.request.method);
-  if (ctx.request.method !== 'OPTIONS') {
-    ctx.response.set({...headers});
-    try {
-      return await next();
-    } catch (e) {
-      e.headers = {...e.headers, ...headers};
-      throw e;
-    }
-  }
+//   console.log(headers, ctx.request.method);
+//   if (ctx.request.method !== 'OPTIONS') {
+//     ctx.response.set({...headers});
+//     try {
+//       return await next();
+//     } catch (e) {
+//       e.headers = {...e.headers, ...headers};
+//       throw e;
+//     }
+//   }
 
-  if (ctx.request.get('Access-Control-Request-Method')) {
-    ctx.response.set({
-      ...headers,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH',
-    });
+//   if (ctx.request.get('Access-Control-Request-Method')) {
+//     ctx.response.set({
+//       ...headers,
+//       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH',
+//     });
 
-    if (ctx.request.get('Access-Control-Request-Headers')) {
-      ctx.response.set('Access-Control-Allow-Headers', 
-                            ctx.request.get('Access-Control-Request-Headers'));
-    }
+//     if (ctx.request.get('Access-Control-Request-Headers')) {
+//       ctx.response.set('Access-Control-Allow-Headers', 
+//                             ctx.request.get('Access-Control-Request-Headers'));
+//     }
 
-    ctx.response.status = 204;
-  }
-});
+//     ctx.response.status = 204;
+//   }
+// });
 
-// => Body Parsers
-app.use(koaBody({
-  text: true,
-  urlencoded: true,
-  multipart: true,
-  json: true,
-}));
+// // => Body Parsers
+// app.use(koaBody({
+//   text: true,
+//   urlencoded: true,
+//   multipart: true,
+//   json: true,
+// }));
 
 // => GET/POST
 app.use(async ctx => {
-    const { method } = ctx.request.querystring;
-    console.log(method, ctx.request.method, ctx.request.querystring, ctx.request.body,
-      ctx.request
-      );
+  console.log('STEP - 2');
+  const { method } = ctx.query;
+  console.log(ctx.request, ctx.query, ctx.request.body);
 
-    switch (method) {
-        case 'allTickets':
-            ctx.response.body = tickets;
-            console.log(tickets);
-            return;
-        default:
-            ctx.response.status = 404;
-            return;
-    }
+  switch (method) {
+      case 'allTickets':
+          ctx.response.body = tickets;
+          console.log(tickets);
+          return;
+      default:
+          ctx.response.status = 404;
+          return;
+  }
+
+  ctx.response.body = 'Server response';
 // const { name, phone } = ctx.request.querystring;
 //   // const { name, phone } = ctx.request.body;  // for POST
 
@@ -120,12 +143,12 @@ app.use(async ctx => {
 //   }
 
 //   subscriptions.set(phone, name);
-  ctx.response.body = 'Ok';
 });
 
-
 const port = process.env.PORT || 7070;
-http.createServer(app.callback()).listen(port, (err) => {
+const server = http.createServer(app.callback());
+
+server.listen(port, (err) => {
   if (err) {
     return console.log('Error occured:', err);
   }
