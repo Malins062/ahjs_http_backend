@@ -9,18 +9,21 @@ const app = new Koa();
 
 const tickets = [
   {
+    id: '1',
     name: 'Поменять краску в принтере, каб.404',
     description: 'Закончилась краска в принтере, модель Epson-CJ300',
     status: true,
     created: '10.03.2022 08:40'
   },
   {
+    id: '2',
     name: 'Переустановить OC Linux, каб.204',
     description: 'Слетела операционная система, требуется переустановка',
     status: true,
     created: '22.11.2022 13:10'
   },
   {
+    id: '3',
     name: 'Установить обновление KB-32565, каб.6',
     description: 'Вышло критическое обновление Windows-10, требуется установка обновления',
     status: false,
@@ -42,19 +45,22 @@ app.use((ctx, next) => {
   console.log(`Request method: ${ctx.request.method}`);
   console.log(`Headers: ${ctx.headers}`);
   
-  if (ctx.request.method !== 'OPTIONS') {
-    next();
+  // if (ctx.request.method !== 'OPTIONS') {
+  //   next();
 
-    return;
-  }
+  //   return;
+  // }
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
+  // ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
 
-  ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
+  ctx.response.body = 'Server response';
 
-  ctx.response.status = 204;
+  next();
 
-  console.log(`Response status code: ${ctx.response.status}`);
+  // ctx.response.status = 204;
+
+  // console.log(`Response status code: ${ctx.response.status}`);
 });
 
 // app.use(async ctx => {
@@ -124,7 +130,8 @@ app.use(async ctx => {
 
   switch (method) {
       case 'allTickets':
-          ctx.response.body = tickets;
+        ctx.response.status = 202;
+        ctx.response.body = tickets;
           console.log(tickets);
           return;
       default:
