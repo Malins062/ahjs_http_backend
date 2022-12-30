@@ -24,7 +24,7 @@ const tickets = [
   },
   {
     id: '3',
-    name: 'Установить обновление KB-32565, каб.6',
+    name: 'Установить обновление KB-32565, каб.106',
     description: 'Вышло критическое обновление Windows-10, требуется установка обновления',
     status: false,
     created: '08.12.2022 10:00'
@@ -52,7 +52,7 @@ app.use((ctx, next) => {
   // }
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
-  // ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
+  ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
 
   ctx.response.body = 'Server response';
 
@@ -131,9 +131,34 @@ app.use(async ctx => {
   switch (method) {
       case 'allTickets':
         ctx.response.status = 202;
-        ctx.response.body = tickets;
-          console.log(tickets);
+        const allTickets = tickets.map(item => {
+          return {
+            id: item.id,
+            name: item.name,
+            status: item.status,
+            created: item.created
+          }
+        });
+
+        ctx.response.body = allTickets;
+        console.log(allTickets);
+        return;
+
+      case 'ticketById':
+        const { id } = ctx.query;
+
+        if (tickets.every(item => item.id !== id)) {
+          ctx.response.status = 400
+          ctx.response.body = `Task id(${id}) doesn't exists!`;
           return;
+        }
+        
+        const ticket = tickets.filter(item => item.id === id);
+        ctx.response.body = ticket;
+        ctx.response.status = 202;
+        console.log(ticket);
+        return;
+
       default:
           ctx.response.status = 404;
           return;
