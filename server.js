@@ -1,4 +1,4 @@
-
+const uuid = require('uuid');
 const http = require('http');
 const path = require('path');
 const Koa = require('koa');
@@ -29,6 +29,13 @@ const tickets = [
     status: false,
     created: '08.12.2022 10:00'
   },
+  {
+    id: '4',
+    name: 'Задача4',
+    description: 'Описание задачи',
+    status: false,
+    created: '08.01.2023 10:00'
+  },
 ];
 
 // => Static file handling
@@ -37,96 +44,75 @@ app.use(koaStatic(public));
 
 app.use(koaBody({
   urlencoded: true,
-  multipart: true,
 }));
 
 app.use((ctx, next) => {
-  console.log('STEP - 1');
-  console.log(`Request method: ${ctx.request.method}`);
-  console.log(`Headers: ${ctx.headers}`);
-  
-  // if (ctx.request.method !== 'OPTIONS') {
-  //   next();
+  if (ctx.request.method !== 'OPTIONS') {
+    next();
 
-  //   return;
-  // }
+    return;
+  }
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
   ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
 
-  ctx.response.body = 'Server response';
-
-  next();
-
-  // ctx.response.status = 204;
-
-  // console.log(`Response status code: ${ctx.response.status}`);
+  ctx.response.status = 204;
 });
 
-// app.use(async ctx => {
-//     const { method } = ctx.request.querystring;
+// => POST
+app.use(async (ctx, next) => {
+  if (ctx.request.method !== 'POST') {
+    next();
 
-//     switch (method) {
-//         case 'allTickets':
-//             ctx.response.body = tickets;
-//             return;
-//         // TODO: обработка остальных методов
-//         default:
-//             ctx.response.status = 404;
-//             return;
-//     }
-// });
+    return;
+  }
 
-
-// => CORS
-// app.use(async (ctx, next) => {
-//   const origin = ctx.request.get('Origin');
-//   console.log(origin);
-//   if (!origin) {
-//     return await next();
-//   }
-
-//   const headers = { 'Access-Control-Allow-Origin': '*', };
-
-//   console.log(headers, ctx.request.method);
-//   if (ctx.request.method !== 'OPTIONS') {
-//     ctx.response.set({...headers});
-//     try {
-//       return await next();
-//     } catch (e) {
-//       e.headers = {...e.headers, ...headers};
-//       throw e;
-//     }
-//   }
-
-//   if (ctx.request.get('Access-Control-Request-Method')) {
-//     ctx.response.set({
-//       ...headers,
-//       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH',
-//     });
-
-//     if (ctx.request.get('Access-Control-Request-Headers')) {
-//       ctx.response.set('Access-Control-Allow-Headers', 
-//                             ctx.request.get('Access-Control-Request-Headers'));
-//     }
-
-//     ctx.response.status = 204;
-//   }
-// });
-
-// // => Body Parsers
-// app.use(koaBody({
-//   text: true,
-//   urlencoded: true,
-//   multipart: true,
-//   json: true,
-// }));
-
-// => GET/POST
-app.use(async ctx => {
-  console.log('STEP - 2');
   const { method } = ctx.query;
   console.log(ctx.request, ctx.query, ctx.request.body);
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  switch (method) {
+      case 'createTicket':
+        const { name, description } = ctx.request.body;
+
+        if (tickets.some(ticket => ticket.name == name)) {
+          ctx.response.status = 400
+          ctx.response.body = `Задача с именем - "${name}" уже существует!`;
+          return;
+        }
+
+        const newTicket = {
+          id: uuid.v4(),
+          name: name,
+          description: description,
+          status: false,
+          created: nowDateTime()
+        }
+
+        tickets.push(newTicket);
+
+        ctx.response.body = newTicket;
+        ctx.response.status = 202;
+        console.log(newTicket);
+        return;
+
+      default:
+          ctx.response.status = 404;
+          return;
+  }
+
+});
+
+// => GET
+app.use(async ctx => {
+  if (ctx.request.method !== 'GET') {
+    return;
+  }
+  const { method } = ctx.query;
+  console.log(ctx.request, ctx.query, ctx.request.body);
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
 
   switch (method) {
       case 'allTickets':
@@ -149,7 +135,7 @@ app.use(async ctx => {
 
         if (tickets.every(item => item.id !== id)) {
           ctx.response.status = 400
-          ctx.response.body = `Task id(${id}) doesn't exists!`;
+          ctx.response.body = `Задачи с идентификатором ${id} не существует!`;
           return;
         }
         
@@ -163,18 +149,6 @@ app.use(async ctx => {
           ctx.response.status = 404;
           return;
   }
-
-  ctx.response.body = 'Server response';
-// const { name, phone } = ctx.request.querystring;
-//   // const { name, phone } = ctx.request.body;  // for POST
-
-//   if (subscriptions.has(phone)) {
-//     ctx.response.status = 400
-//     ctx.response.body = 'You already subscribed';
-//     return;
-//   }
-
-//   subscriptions.set(phone, name);
 });
 
 const port = process.env.PORT || 7070;
@@ -182,7 +156,17 @@ const server = http.createServer(app.callback());
 
 server.listen(port, (err) => {
   if (err) {
-    return console.log('Error occured:', err);
+    return console.log('Произошла ошибка:', err);
   }
-  console.log(`Server is listening on port: ${port}.`);
+  
+  console.log(`Сервер запущен в ${nowDateTime()}. Прослушиваем порт: ${port}.`);
 });
+
+function nowDateTime() {
+  const now = new Date();
+  const nowDateTime = `${now.toLocaleString([], 
+    {day: 'numeric', month: 'numeric', year: 'numeric',
+     hour: '2-digit', minute: '2-digit', hour12: false })}`;
+     
+  return nowDateTime;
+}
