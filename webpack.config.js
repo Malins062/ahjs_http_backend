@@ -1,5 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
   target: 'node',
@@ -16,5 +15,5 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
-  }
+  },
 };
