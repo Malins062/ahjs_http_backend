@@ -21,7 +21,9 @@
     "koa-body": "^4.2.0",
     "koa-static": "^5.0.0",
     "uuid": "^8.3.2",
-    "webpack": "^5.11.1"
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.1",
+    "webpack-dev-server": "^3.11.1"
   },
   "engines": {
     "node": "10.x"
