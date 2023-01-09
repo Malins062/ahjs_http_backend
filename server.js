@@ -88,8 +88,8 @@ app.use((ctx, next) => {
 
   switch (method) {
     case 'deleteTicket': {
-      console.log('deleteTicket ctx.request.query=', ctx.request.query);
-      const { id } =  ctx.request.query;
+      // console.log('deleteTicket ctx.request.query=', ctx.request.query);
+      const { id } = ctx.request.query;
 
       if (tickets.every((item) => item.id !== id)) {
         ctx.response.status = 400;
@@ -101,7 +101,7 @@ app.use((ctx, next) => {
 
       ctx.response.body = {
         msg: 'Ticket was successfully deleted.',
-        id: id
+        id,
       };
       ctx.response.status = 202;
       // console.log(newTicket);  // eslint-disable-line no-console
@@ -128,7 +128,7 @@ app.use((ctx, next) => {
 
   switch (method) {
     case 'createTicket': {
-      console.log('createTicket ctx.request.body=', ctx.request.body);
+      // console.log('createTicket ctx.request.body=', ctx.request.body);
       const { name, description } = ctx.request.body;
 
       if (tickets.some((ticket) => ticket.name === name)) {
