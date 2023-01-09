@@ -22,7 +22,7 @@ function nowDateTime() {
 
 const app = new Koa();
 
-const tickets = [
+let tickets = [
   {
     id: '1',
     name: 'Поменять краску в принтере, каб.404',
@@ -46,7 +46,7 @@ const tickets = [
   },
   {
     id: '4',
-    name: 'Задача4',
+    name: '123',
     description: 'Описание задачи',
     status: false,
     created: '08.01.2023 10:00',
@@ -74,8 +74,47 @@ app.use((ctx, next) => {
   ctx.response.status = 204;
 });
 
+// => DELETE
+app.use((ctx, next) => {
+  if (ctx.request.method !== 'DELETE') {
+    next();
+
+    return;
+  }
+
+  const { method } = ctx.query;
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  switch (method) {
+    case 'deleteTicket': {
+      console.log('deleteTicket ctx.request.query=', ctx.request.query);
+      const { id } =  ctx.request.query;
+
+      if (tickets.every((item) => item.id !== id)) {
+        ctx.response.status = 400;
+        ctx.response.body = `Задачи с идентификатором ${id} не существует!`;
+        return;
+      }
+
+      tickets = tickets.filter((item) => item.id !== id);
+
+      ctx.response.body = {
+        msg: 'Ticket was successfully deleted.',
+        id: id
+      };
+      ctx.response.status = 202;
+      // console.log(newTicket);  // eslint-disable-line no-console
+      return;
+    }
+
+    default:
+      ctx.response.status = 404;
+  }
+});
+
 // => POST
-app.use(async (ctx, next) => {
+app.use((ctx, next) => {
   if (ctx.request.method !== 'POST') {
     next();
 
@@ -89,6 +128,7 @@ app.use(async (ctx, next) => {
 
   switch (method) {
     case 'createTicket': {
+      console.log('createTicket ctx.request.body=', ctx.request.body);
       const { name, description } = ctx.request.body;
 
       if (tickets.some((ticket) => ticket.name === name)) {
@@ -119,7 +159,7 @@ app.use(async (ctx, next) => {
 });
 
 // => GET
-app.use(async (ctx) => {
+app.use((ctx) => {
   if (ctx.request.method !== 'GET') {
     return;
   }
