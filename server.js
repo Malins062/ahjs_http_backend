@@ -173,7 +173,7 @@ app.use((ctx, next) => {
 
   switch (method) {
     case 'changeStatusTicket': {
-      // console.log('createTicket ctx.request.body=', ctx.request.body);
+      // console.log('changeStatusTicket ctx.request.body=', ctx.request.body);
       const { status } = ctx.request.body;
 
       const indexTicket = tickets.findIndex((ticket) => ticket.id === id);
@@ -181,7 +181,19 @@ app.use((ctx, next) => {
 
       ctx.response.body = tickets[indexTicket];
       ctx.response.status = 202;
-      // console.log(newTicket);  // eslint-disable-line no-console
+      return;
+    }
+
+    case 'changeTicket': {
+      // console.log('changeTicket ctx.request.body=', ctx.request.body);
+      const { name, description } = ctx.request.body;
+
+      const indexTicket = tickets.findIndex((ticket) => ticket.id === id);
+      tickets[indexTicket].name = name;
+      tickets[indexTicket].description = description;
+
+      ctx.response.body = tickets[indexTicket];
+      ctx.response.status = 202;
       return;
     }
 
