@@ -158,6 +158,38 @@ app.use((ctx, next) => {
   }
 });
 
+// => PATCH
+app.use((ctx, next) => {
+  if (ctx.request.method !== 'PATCH') {
+    next();
+
+    return;
+  }
+
+  const { method, id } = ctx.query;
+  // console.log(ctx.request, ctx.query, ctx.request.body);
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  switch (method) {
+    case 'changeStatusTicket': {
+      // console.log('createTicket ctx.request.body=', ctx.request.body);
+      const { status } = ctx.request.body;
+
+      const indexTicket = tickets.findIndex((ticket) => ticket.id === id);
+      tickets[indexTicket].status = status === 'true';
+
+      ctx.response.body = tickets[indexTicket];
+      ctx.response.status = 202;
+      // console.log(newTicket);  // eslint-disable-line no-console
+      return;
+    }
+
+    default:
+      ctx.response.status = 404;
+  }
+});
+
 // => GET
 app.use((ctx) => {
   if (ctx.request.method !== 'GET') {
